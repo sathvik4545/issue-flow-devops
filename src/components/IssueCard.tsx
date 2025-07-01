@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, User, AlertCircle } from "lucide-react";
+import { Clock, User, AlertCircle, ArrowUp, ArrowDown, Minus } from "lucide-react";
 
 interface Issue {
   id: string;
@@ -21,20 +21,39 @@ interface IssueCardProps {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "open": return "bg-red-100 text-red-800 border-red-200";
-    case "in-progress": return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "closed": return "bg-green-100 text-green-800 border-green-200";
-    default: return "bg-gray-100 text-gray-800 border-gray-200";
+    case "open": return "bg-red-50 text-red-700 border-red-200 hover:bg-red-100";
+    case "in-progress": return "bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100";
+    case "closed": return "bg-green-50 text-green-700 border-green-200 hover:bg-green-100";
+    default: return "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100";
   }
 };
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
-    case "low": return "bg-blue-100 text-blue-800 border-blue-200";
-    case "medium": return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "high": return "bg-orange-100 text-orange-800 border-orange-200";
-    case "critical": return "bg-red-100 text-red-800 border-red-200";
-    default: return "bg-gray-100 text-gray-800 border-gray-200";
+    case "low": return "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100";
+    case "medium": return "bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100";
+    case "high": return "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100";
+    case "critical": return "bg-red-50 text-red-700 border-red-200 hover:bg-red-100";
+    default: return "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100";
+  }
+};
+
+const getPriorityIcon = (priority: string) => {
+  switch (priority) {
+    case "low": return <ArrowDown className="h-3 w-3" />;
+    case "medium": return <Minus className="h-3 w-3" />;
+    case "high": return <ArrowUp className="h-3 w-3" />;
+    case "critical": return <AlertCircle className="h-3 w-3" />;
+    default: return <Minus className="h-3 w-3" />;
+  }
+};
+
+const getStatusBorderColor = (status: string) => {
+  switch (status) {
+    case "open": return "border-l-red-500";
+    case "in-progress": return "border-l-yellow-500";
+    case "closed": return "border-l-green-500";
+    default: return "border-l-gray-500";
   }
 };
 
@@ -49,20 +68,24 @@ const formatDate = (dateString: string) => {
 export const IssueCard = ({ issue, onClick }: IssueCardProps) => {
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow duration-200 border-l-4 border-l-primary"
+      className={`cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-l-4 ${getStatusBorderColor(issue.status)} bg-white/80 backdrop-blur-sm border-0 shadow-lg group`}
       onClick={onClick}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h3 className="font-semibold text-lg mb-2 line-clamp-1">{issue.title}</h3>
-            <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
+            <h3 className="font-semibold text-lg mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
+              {issue.title}
+            </h3>
+            <p className="text-muted-foreground text-sm line-clamp-2 mb-3 leading-relaxed">
               {issue.description}
             </p>
           </div>
           <div className="flex items-center space-x-2 ml-4">
             {issue.priority === "critical" && (
-              <AlertCircle className="h-4 w-4 text-red-500" />
+              <div className="p-1 bg-red-100 rounded-full">
+                <AlertCircle className="h-4 w-4 text-red-500" />
+              </div>
             )}
           </div>
         </div>
@@ -70,19 +93,20 @@ export const IssueCard = ({ issue, onClick }: IssueCardProps) => {
       <CardContent className="pt-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Badge className={getStatusColor(issue.status)} variant="outline">
+            <Badge className={`${getStatusColor(issue.status)} transition-colors font-medium`} variant="outline">
               {issue.status === "in-progress" ? "In Progress" : issue.status.charAt(0).toUpperCase() + issue.status.slice(1)}
             </Badge>
-            <Badge className={getPriorityColor(issue.priority)} variant="outline">
+            <Badge className={`${getPriorityColor(issue.priority)} transition-colors font-medium flex items-center gap-1`} variant="outline">
+              {getPriorityIcon(issue.priority)}
               {issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1)}
             </Badge>
           </div>
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1 bg-slate-50 px-2 py-1 rounded-full">
               <User className="h-3 w-3" />
-              <span>{issue.assignee}</span>
+              <span className="font-medium">{issue.assignee}</span>
             </div>
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1 bg-slate-50 px-2 py-1 rounded-full">
               <Clock className="h-3 w-3" />
               <span>{formatDate(issue.updatedAt)}</span>
             </div>
