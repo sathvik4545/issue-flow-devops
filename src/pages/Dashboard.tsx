@@ -1,53 +1,42 @@
-import { useState, useEffect } from "react";
+
+import React, { useState, useCallback, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Filter, Search, Bell, User, LogOut, TrendingUp, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { IssueCard } from "@/components/IssueCard";
+import { OptimizedIssueCard } from "@/components/OptimizedIssueCard";
 import { CreateIssueDialog } from "@/components/CreateIssueDialog";
 import { IssueDetailsDialog } from "@/components/IssueDetailsDialog";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
+import { useIssues } from "@/hooks/useIssues";
 
-// Mock data - will be replaced with Supabase data
-const mockIssues = [
-  {
-    id: "1",
-    title: "Fix login button alignment",
-    description: "The login button is not properly aligned on mobile devices",
-    status: "open" as const,
-    priority: "medium" as const,
-    assignee: "John Doe",
-    createdAt: "2024-01-15T10:30:00Z",
-    updatedAt: "2024-01-15T10:30:00Z"
-  },
-  {
-    id: "2",
-    title: "Implement dark mode",
-    description: "Add dark mode support across the application",
-    status: "in-progress" as const,
-    priority: "high" as const,
-    assignee: "Jane Smith",
-    createdAt: "2024-01-14T14:20:00Z",
-    updatedAt: "2024-01-15T09:15:00Z"
-  },
-  {
-    id: "3",
-    title: "Database optimization",
-    description: "Optimize database queries for better performance",
-    status: "closed" as const,
-    priority: "critical" as const,
-    assignee: "Mike Johnson",
-    createdAt: "2024-01-13T16:45:00Z",
-    updatedAt: "2024-01-15T11:00:00Z"
-  }
-];
+interface Issue {
+  id: string;
+  title: string;
+  description: string;
+  status: "open" | "in-progress" | "closed";
+  priority: "low" | "medium" | "high" | "critical";
+  assignee: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const Dashboard = () => {
-  const [issues, setIssues] = useState(mockIssues);
-  const [selectedIssue, setSelectedIssue] = useState(null);
+  const {
+    issues,
+    loading: issuesLoading,
+    addIssue,
+    updateIssue,
+    deleteIssue,
+    getFilteredIssues,
+    getStatusCounts
+  } = useIssues();
+
+  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,77 +46,65 @@ const Dashboard = () => {
   const { showSuccess, showInfo } = useNotifications();
   const navigate = useNavigate();
 
-  // Load issues from localStorage on mount
-  useEffect(() => {
-    const savedIssues = localStorage.getItem('devtrack_issues');
-    if (savedIssues) {
-      setIssues(JSON.parse(savedIssues));
-    }
-  }, []);
+  const filteredIssues = useMemo(() => {
+    return getFilteredIssues(searchTerm, statusFilter);
+  }, [getFilteredIssues, searchTerm, statusFilter]);
 
-  // Save issues to localStorage whenever issues change
-  useEffect(() => {
-    localStorage.setItem('devtrack_issues', JSON.stringify(issues));
-  }, [issues]);
+  const statusCounts = useMemo(() => {
+    return getStatusCounts;
+  }, [getStatusCounts]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     showSuccess("Logged out successfully");
     navigate("/");
-  };
+  }, [logout, showSuccess, navigate]);
 
-  const handleNotifications = () => {
+  const handleNotifications = useCallback(() => {
     showInfo("No new notifications");
-  };
+  }, [showInfo]);
 
-  const filteredIssues = issues.filter(issue => {
-    const matchesSearch = issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         issue.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || issue.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const handleCreateIssue = (newIssue) => {
-    const issue = {
+  const handleCreateIssue = useCallback((newIssue: any) => {
+    const issue = addIssue({
       ...newIssue,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
       assignee: user?.name || "Current User"
-    };
-    setIssues([issue, ...issues]);
+    });
     setShowCreateDialog(false);
     showSuccess("Issue created successfully!");
-  };
+  }, [addIssue, user?.name, showSuccess]);
 
-  const handleIssueClick = (issue) => {
+  const handleIssueClick = useCallback((issue: Issue) => {
     setSelectedIssue(issue);
     setShowDetailsDialog(true);
-  };
+  }, []);
 
-  const handleUpdateIssue = (updatedIssue) => {
-    setIssues(prev => prev.map(issue => 
-      issue.id === updatedIssue.id ? { ...updatedIssue, updatedAt: new Date().toISOString() } : issue
-    ));
+  const handleUpdateIssue = useCallback((updatedIssue: Issue) => {
+    updateIssue(updatedIssue);
     setShowDetailsDialog(false);
     showSuccess("Issue updated successfully!");
-  };
+  }, [updateIssue, showSuccess]);
 
-  const handleDeleteIssue = (issueId) => {
-    setIssues(prev => prev.filter(issue => issue.id !== issueId));
+  const handleDeleteIssue = useCallback((issueId: string) => {
+    deleteIssue(issueId);
     setShowDetailsDialog(false);
     showSuccess("Issue deleted successfully!");
-  };
+  }, [deleteIssue, showSuccess]);
 
-  const getStatusCounts = () => {
-    return {
-      open: issues.filter(i => i.status === "open").length,
-      inProgress: issues.filter(i => i.status === "in-progress").length,
-      closed: issues.filter(i => i.status === "closed").length
-    };
-  };
+  const handleStatusFilterChange = useCallback((status: string) => {
+    setStatusFilter(status);
+  }, []);
 
-  const statusCounts = getStatusCounts();
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  if (issuesLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <LoadingSpinner size="lg" text="Loading dashboard..." />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -218,7 +195,7 @@ const Dashboard = () => {
                 <Input
                   placeholder="Search issues..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                   className="pl-10 border-0 bg-slate-50 focus:bg-white transition-colors"
                 />
               </div>
@@ -226,7 +203,7 @@ const Dashboard = () => {
                 <Button
                   variant={statusFilter === "all" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setStatusFilter("all")}
+                  onClick={() => handleStatusFilterChange("all")}
                   className="transition-all hover:scale-105"
                 >
                   All
@@ -234,7 +211,7 @@ const Dashboard = () => {
                 <Button
                   variant={statusFilter === "open" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setStatusFilter("open")}
+                  onClick={() => handleStatusFilterChange("open")}
                   className="transition-all hover:scale-105"
                 >
                   Open
@@ -242,7 +219,7 @@ const Dashboard = () => {
                 <Button
                   variant={statusFilter === "in-progress" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setStatusFilter("in-progress")}
+                  onClick={() => handleStatusFilterChange("in-progress")}
                   className="transition-all hover:scale-105"
                 >
                   In Progress
@@ -250,7 +227,7 @@ const Dashboard = () => {
                 <Button
                   variant={statusFilter === "closed" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setStatusFilter("closed")}
+                  onClick={() => handleStatusFilterChange("closed")}
                   className="transition-all hover:scale-105"
                 >
                   Closed
@@ -286,9 +263,9 @@ const Dashboard = () => {
                 className="animate-in slide-in-from-bottom-4"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <IssueCard
+                <OptimizedIssueCard
                   issue={issue}
-                  onClick={() => handleIssueClick(issue)}
+                  onClick={handleIssueClick}
                 />
               </div>
             ))
