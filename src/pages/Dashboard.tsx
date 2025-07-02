@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { IssueCard } from "@/components/IssueCard";
 import { CreateIssueDialog } from "@/components/CreateIssueDialog";
 import { IssueDetailsDialog } from "@/components/IssueDetailsDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationContext";
+import { useNavigate } from "react-router-dom";
 
 // Mock data - will be replaced with Supabase data
 const mockIssues = [
@@ -50,6 +52,33 @@ const Dashboard = () => {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  
+  const { user, logout } = useAuth();
+  const { showSuccess, showInfo } = useNotifications();
+  const navigate = useNavigate();
+
+  // Load issues from localStorage on mount
+  useEffect(() => {
+    const savedIssues = localStorage.getItem('devtrack_issues');
+    if (savedIssues) {
+      setIssues(JSON.parse(savedIssues));
+    }
+  }, []);
+
+  // Save issues to localStorage whenever issues change
+  useEffect(() => {
+    localStorage.setItem('devtrack_issues', JSON.stringify(issues));
+  }, [issues]);
+
+  const handleLogout = () => {
+    logout();
+    showSuccess("Logged out successfully");
+    navigate("/");
+  };
+
+  const handleNotifications = () => {
+    showInfo("No new notifications");
+  };
 
   const filteredIssues = issues.filter(issue => {
     const matchesSearch = issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,10 +93,11 @@ const Dashboard = () => {
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      assignee: "Current User"
+      assignee: user?.name || "Current User"
     };
     setIssues([issue, ...issues]);
     setShowCreateDialog(false);
+    showSuccess("Issue created successfully!");
   };
 
   const handleIssueClick = (issue) => {
@@ -80,11 +110,13 @@ const Dashboard = () => {
       issue.id === updatedIssue.id ? { ...updatedIssue, updatedAt: new Date().toISOString() } : issue
     ));
     setShowDetailsDialog(false);
+    showSuccess("Issue updated successfully!");
   };
 
   const handleDeleteIssue = (issueId) => {
     setIssues(prev => prev.filter(issue => issue.id !== issueId));
     setShowDetailsDialog(false);
+    showSuccess("Issue deleted successfully!");
   };
 
   const getStatusCounts = () => {
@@ -117,13 +149,16 @@ const Dashboard = () => {
               </Badge>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" className="hover:bg-blue-50 transition-colors">
+              <span className="text-sm text-muted-foreground hidden sm:block">
+                Welcome, {user?.name}
+              </span>
+              <Button variant="ghost" size="sm" className="hover:bg-blue-50 transition-colors" onClick={handleNotifications}>
                 <Bell className="h-4 w-4" />
               </Button>
               <Button variant="ghost" size="sm" className="hover:bg-blue-50 transition-colors">
                 <User className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="hover:bg-red-50 hover:text-red-600 transition-colors">
+              <Button variant="ghost" size="sm" className="hover:bg-red-50 hover:text-red-600 transition-colors" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>

@@ -37,6 +37,15 @@ export const CreateIssueDialog = ({ open, onOpenChange, onCreateIssue }: CreateI
     setStatus("open");
   };
 
+  const handleCancel = () => {
+    // Reset form when closing
+    setTitle("");
+    setDescription("");
+    setPriority("medium");
+    setStatus("open");
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
@@ -45,13 +54,14 @@ export const CreateIssueDialog = ({ open, onOpenChange, onCreateIssue }: CreateI
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter issue title..."
               required
+              className="transition-all focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
@@ -62,7 +72,7 @@ export const CreateIssueDialog = ({ open, onOpenChange, onCreateIssue }: CreateI
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the issue..."
-              className="min-h-[100px]"
+              className="min-h-[100px] transition-all focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -70,7 +80,7 @@ export const CreateIssueDialog = ({ open, onOpenChange, onCreateIssue }: CreateI
             <div className="space-y-2">
               <Label>Priority</Label>
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger>
+                <SelectTrigger className="transition-all focus:ring-2 focus:ring-blue-500">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -85,7 +95,7 @@ export const CreateIssueDialog = ({ open, onOpenChange, onCreateIssue }: CreateI
             <div className="space-y-2">
               <Label>Status</Label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
+                <SelectTrigger className="transition-all focus:ring-2 focus:ring-blue-500">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -101,11 +111,17 @@ export const CreateIssueDialog = ({ open, onOpenChange, onCreateIssue }: CreateI
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={handleCancel}
             >
               Cancel
             </Button>
-            <Button type="submit">Create Issue</Button>
+            <Button 
+              type="submit" 
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              disabled={!title.trim()}
+            >
+              Create Issue
+            </Button>
           </div>
         </form>
       </DialogContent>
