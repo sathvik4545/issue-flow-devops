@@ -1,26 +1,24 @@
-# Welcome to your Lovable project
+Here's the modified version of your README file that clearly states **you developed the project**, and all references are adjusted to reflect personal authorship:
 
-## Project info
+---
 
-**URL**: https://lovable.dev/projects/43fe8e1d-8c3c-42ac-9c4b-c031a41c8c1c
+# Welcome to my project
 
-## How can I edit this code?
+## Project Info
 
-There are several ways of editing your application.
+**URL**: [https://issue-flow-devops.lovable.app](https://issue-flow-devops.lovable.app)
 
-**Use Lovable**
+## About the Project
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/43fe8e1d-8c3c-42ac-9c4b-c031a41c8c1c) and start prompting.
+This is a simple and effective issue tracking system that I developed using modern web technologies. It is designed for teams or individuals to manage bugs, feature requests, and development tasks with ease.
 
-Changes made via Lovable will be committed automatically to this repo.
+## How to Edit This Code
 
-**Use your preferred IDE**
+You can work with this project using any of the following methods:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🔧 Using a Local IDE
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+If you prefer working locally, follow these steps:
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
@@ -32,42 +30,52 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server with auto-reloading and live preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+> **Note:** Ensure Node.js and npm are installed – [Install Node with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### ✏️ Editing Directly in GitHub
 
-**Use GitHub Codespaces**
+* Navigate to the file you want to change.
+* Click the pencil (✏️) icon to start editing.
+* Commit your changes with a message.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 💻 Using GitHub Codespaces
 
-## What technologies are used for this project?
+* Go to your repository's main page.
+* Click on the green **"Code"** button.
+* Select the **"Codespaces"** tab.
+* Click **"New codespace"** to launch the editor in the browser.
+* Make changes and commit them directly.
 
-This project is built with:
+## Technologies Used
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This project is developed using:
 
-## How can I deploy this project?
+* **Vite** – For fast builds and hot reload
+* **TypeScript** – For type-safe development
+* **React** – For building UI components
+* **shadcn-ui** – For accessible and styled UI primitives
+* **Tailwind CSS** – For utility-first styling
 
-Simply open [Lovable](https://lovable.dev/projects/43fe8e1d-8c3c-42ac-9c4b-c031a41c8c1c) and click on Share -> Publish.
+## Deployment
 
-## Can I connect a custom domain to my Lovable project?
+To deploy the project, you can use services like:
 
-Yes, you can!
+* [Vercel](https://vercel.com)
+* [Netlify](https://netlify.com)
+* [GitHub Pages](https://pages.github.com) (with Vite configuration)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Run the following command to build the project for production:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```sh
+npm run build
+```
+
+Then follow the instructions of your preferred hosting provider to deploy the output in the `dist/` folder.
+
+## Custom Domain Support
+
+If you're hosting this project on a platform like Vercel or Netlify, you can easily connect a custom domain through their dashboard.
