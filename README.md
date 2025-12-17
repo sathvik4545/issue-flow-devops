@@ -1,5 +1,3 @@
-Here's the modified version of your README file that clearly states **you developed the project**, and all references are adjusted to reflect personal authorship:
-
 ---
 
 # Welcome to my project
